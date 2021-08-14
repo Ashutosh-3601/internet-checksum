@@ -13,9 +13,9 @@ class CheckSum:
     def init(self, inject=False):
         for i in range(0, len(self.data), 2):
             self.frames.append(self.data[i:i+2])
-        self.generate()
         if inject: 
             self.injectError()
+        self.generate()
         return self.checksum
         
     def generate(self):
@@ -46,11 +46,14 @@ class CheckSum:
             self.checksum = checksum[2:]
 
     def injectError(self):
-        chars = 'abcedef0123456789'
+        chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcedefghijklmnopqrstuvwxyz0123456789'
         print('Error injected')
-        print(f'Original Sum was : {self.checksum}\n')
-        self.checksum = self.checksum.replace(self.checksum[random.randint(0,3)], chars[random.randint(0,15)])
-
+        index = random.randint(1, len(self.frames)-1)
+        targetFrame = self.frames[index]
+        injectedError = targetFrame.replace(targetFrame[random.randint(1, len(targetFrame)-1)], chars[random.randint(1,len(chars)-1)])
+        self.frames[index] = injectedError
+        print(f'Original Data Frame was : {targetFrame}')
+        print(f'New Errored Data Frame  : {injectedError}\n')
 
     
 class SenderCheckSum(CheckSum):
@@ -87,8 +90,9 @@ print('\33[5mSending data => \t\33[0m', data)
 time.sleep(2)
 
 reciever = RecieverCheckSum(sender).validate()
-print('Checksum :', reciever)
+print('Recieved Checksum :', sender)
+print('Reciever Side Checksum :', reciever)
 if reciever != '0':
-    print('Error in data recieved. \33[31m[Rejected]\33[0m')
+    print('Error in data recieved. \33[31m[Rejected Data]\33[0m')
 else:
-    print('No error in data \33[32m[Accepted]\33[0m')
+    print('No error in data \33[32m[Accepted Data]\33[0m')
